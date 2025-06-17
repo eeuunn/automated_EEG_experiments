@@ -1,0 +1,10 @@
+# name: 단계 이름, dur: 지속 시간(s), send: [목표, 명령]
+- { name: "시나리오(1문)", dur: 60.3, send: [A:REC_ON,  B:SHOW_START] }
+- { name: "선택지1",        dur: 15.3, send: [B:NEXT] }
+- { name: "선택지2",        dur: 15.3, send: [B:NEXT] }
+- { name: "선택지3",        dur: 15.3, send: [B:NEXT] }
+- { name: "선택지4",        dur: 15.3, send: [B:NEXT] }
+- { name: "선택지5",        dur: 15.3, send: [B:NEXT] }
+- { name: "고민시간",        dur: 30.0 }
+- { name: "응답",           dur: 10.0, send: [A:MARK_RESP] }
+- { name: "ITI",           dur: 10.0, send: [A:REC_OFF, B:SHOW_END] }
