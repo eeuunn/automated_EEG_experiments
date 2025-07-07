@@ -6,7 +6,7 @@ EEG PC (A) – Telescan 마우스 자동화 (마커 X)
 - PING/PONG      : 연결 확인
 """
 
-import socket, pyautogui, time, pathlib, datetime, json, yaml
+import socket, pyautogui, time, pathlib, datetime, json, yaml, re
 from config import PORT, LOG_DIR
 
 # ── 실험 참가자 ID만 앞에서 바꿔 주세요 ───────────
@@ -45,6 +45,10 @@ scenario = load_scenario()
 # 현재 단계 인덱스 추적용
 current_step_idx = 0
 
+def safe_filename(s):
+    # 파일명에 쓸 수 없는 문자(\ / : * ? " < > |)를 _로 대체
+    return re.sub(r'[\\/:*?"<>|]', '_', s)
+
 def record_on(label="noLabel"):
     global cur_label, current_step_idx
     cur_label = label
@@ -61,28 +65,28 @@ def record_off():
     pyautogui.click(*pos("REC_STOP"))
     time.sleep(0.4)
     prev_step_name = scenario[current_step_idx]["name"] if current_step_idx < len(scenario) else "unknown"
-    fname = f"{subject_id}_{prev_step_name}_{datetime.datetime.now():%H%M%S}"
+    # 파일명 안전하게 변환
+    safe_id = safe_filename(subject_id)
+    safe_step = safe_filename(prev_step_name)
+    fname = f"{safe_id}_{trial}회차_{safe_step}_{datetime.datetime.now():%H%M%S}"
     if first_trial:
-        # 1회차: 폴더 생성 및 진입
-        pyautogui.typewrite(fname)  # 이름 입력
-        pyautogui.press("enter")    # Enter
-        time.sleep(0.2)             # 잠시 대기
-        pyautogui.press("enter")    # Enter
+        pyautogui.typewrite(fname)
+        pyautogui.press("enter")
+        time.sleep(0.2)
+        pyautogui.press("enter")
         pyautogui.click(*pos("ARROW_DOWN"))
         pyautogui.click(*pos("DESKTOP_BTN"))
         pyautogui.click(*pos("NEW_FOLDER_BTN"))
-        pyautogui.typewrite(subject_id)
+        pyautogui.typewrite(safe_id)
         pyautogui.press("enter")
         time.sleep(0.2)
         pyautogui.press("enter")
         pyautogui.doubleClick(*pos("FOLDER_DOUBLECLICK"))
-        # 피험자별/주제별/회차별 이름 입력 (여기서는 fname)
         pyautogui.typewrite(fname)
         pyautogui.press("enter")
         pyautogui.press("enter")
         first_trial = False
     else:
-        # 2회차 이상: 바로 이름 입력 및 저장
         pyautogui.typewrite(fname)
         pyautogui.press("enter")
         pyautogui.press("enter")
