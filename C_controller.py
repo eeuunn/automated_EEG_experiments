@@ -32,8 +32,50 @@ def log(txt):
     with open(LOG_PATH / f"controller_{ts[:10]}.csv","a",encoding="utf-8") as f:
         f.write(f"{ts},{txt}\n")
 
+# ───── 피험자 이름 입력 (Pygame UI) ─────
+subject_id = ""
+def input_subject_id():
+    global subject_id
+    input_box = pygame.Rect(200, 180, 200, 40)
+    color_inactive = pygame.Color('lightskyblue3')
+    color_active = pygame.Color('dodgerblue2')
+    color = color_inactive
+    active = False
+    text = ''
+    done = False
+    while not done:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit(); sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if input_box.collidepoint(event.pos):
+                    active = not active
+                else:
+                    active = False
+                color = color_active if active else color_inactive
+            if event.type == pygame.KEYDOWN:
+                if active:
+                    if event.key == pygame.K_RETURN:
+                        subject_id = text.strip()
+                        done = True
+                    elif event.key == pygame.K_BACKSPACE:
+                        text = text[:-1]
+                    else:
+                        text += event.unicode
+        screen.fill((30,30,30))
+        screen.blit(FONT.render("피험자 이름 입력:", True, (255,255,255)), (40, 100))
+        txt_surface = FONT.render(text, True, (255,255,255))
+        width = max(200, txt_surface.get_width()+10)
+        input_box.w = width
+        screen.blit(txt_surface, (input_box.x+5, input_box.y+5))
+        pygame.draw.rect(screen, color, input_box, 2)
+        pygame.display.flip()
+        clock.tick(30)
+
 # ───── 시나리오 스레드 (START 되면 실행) ──────────────────────
 def scenario_worker():
+    # 피험자 이름 먼저 전송
+    send(A_IP, f"SUBJECT:{subject_id}")
     with open(SCENARIO_FILE, encoding="utf-8") as f:
         steps = yaml.safe_load(f)
     for st in steps:
@@ -78,6 +120,9 @@ def ping_peers():                          # ★ 1초마다 핑
 
 clock = pygame.time.Clock(); t_ping=0
 btn_rect = pygame.Rect(460, 40, 140, 60)   # ★ 'START' 버튼 영역
+
+# --- 메인 루프 시작 전 피험자 이름 입력 ---
+input_subject_id()
 
 while True:
     for e in pygame.event.get():
