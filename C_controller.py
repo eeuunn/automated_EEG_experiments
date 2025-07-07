@@ -77,7 +77,7 @@ def scenario_worker():
     # 피험자 이름 먼저 전송
     send(A_IP, f"SUBJECT:{subject_id}")
     with open(SCENARIO_FILE, encoding="utf-8") as f:
-        steps = yaml.safe_load(f)
+        steps = yaml.safe_load(f)["scenario"]
     for st in steps:
         name,dur = st["name"], float(st["dur"])
         _state.update(step=name, remain=dur)

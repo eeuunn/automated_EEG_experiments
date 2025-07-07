@@ -26,44 +26,13 @@ def log(msg):
 
 # ── Telescan 제어 함수 ────────────────────────────
 cur_label = None
-def record_on(label="noLabel"):
-    global cur_label
-    cur_label = label
-    pyautogui.click(*pos("REC_START"))
-    log(f"REC_START:{label}")
+subject_id = "subj001"  # 기본값, SUBJECT 메시지로 갱신됨
 
-def record_off():
-    global cur_label
-    pyautogui.click(*pos("REC_STOP"))
-    time.sleep(0.4)                                # 저장 창 뜰 때까지 약간 대기
+# 회차 관리 변수 (실험 시작 시 1로 초기화, 이후 코드에서 증가 필요)
+trial = 1
 
-    fname = f"{cur_label}_{datetime.datetime.now():%H%M%S}"
-
-    # 1) 파일명 입력
-    # pyautogui.click(*pos("FILENAME_BOX"))
-    pyautogui.typewrite(fname)
-
-    # 2) 경로 변경 → 바탕화면
-    pyautogui.click(*pos("PATH_BAR"))
-    pyautogui.click(*pos("DESKTOP_BTN"))
-    time.sleep(0.2)
-
-    # 3) 참가자 전용 폴더 만들기 & 진입
-    pyautogui.hotkey("ctrl", "shift", "n")         # Windows 새 폴더 단축키
-    pyautogui.typewrite(SUBJECT_ID); pyautogui.press("enter")
-    time.sleep(0.2)
-    pyautogui.doubleClick(*pos("DESKTOP_BTN"))     # 폴더가 선택된 상태면 엔터~더블클릭 둘 중 하나 사용
-    time.sleep(0.2)
-
-    # 4) Save
-    pyautogui.click(*pos("SAVE_BUTTON"))
-    log(f"REC_SAVED:{fname}")
-    cur_label = None
-
-# ── UDP 수신 루프 (PING 포함) ───────────────────────
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.bind(("0.0.0.0", PORT))
-print(f"[A] mouse-control – 포트 {PORT}")
+# 1회차 저장 플래그 (실험 시작 시 True, 이후 False)
+first_trial = True
 
 def load_scenario(yaml_path="scenario.yaml"):
     with open(yaml_path, encoding="utf-8") as f:
@@ -71,17 +40,68 @@ def load_scenario(yaml_path="scenario.yaml"):
     scenario = data["scenario"]
     return scenario
 
+scenario = load_scenario()
+
+# 현재 단계 인덱스 추적용
+current_step_idx = 0
+
+def record_on(label="noLabel"):
+    global cur_label, current_step_idx
+    cur_label = label
+    pyautogui.click(*pos("REC_START"))
+    log(f"REC_START:{label}")
+    # label이 단계 이름이면, 현재 단계 인덱스 갱신
+    for i, step in enumerate(scenario):
+        if step["name"] == label:
+            current_step_idx = i
+            break
+
+def record_off():
+    global cur_label, current_step_idx, subject_id, trial, first_trial
+    pyautogui.click(*pos("REC_STOP"))
+    time.sleep(0.4)
+    prev_step_name = scenario[current_step_idx]["name"] if current_step_idx < len(scenario) else "unknown"
+    fname = f"{subject_id}_{prev_step_name}_{datetime.datetime.now():%H%M%S}"
+    if first_trial:
+        # 1회차: 폴더 생성 및 진입
+        pyautogui.typewrite(fname)  # 이름 입력
+        pyautogui.press("enter")    # Enter
+        time.sleep(0.2)             # 잠시 대기
+        pyautogui.press("enter")    # Enter
+        pyautogui.click(*pos("ARROW_DOWN"))
+        pyautogui.click(*pos("DESKTOP_BTN"))
+        pyautogui.click(*pos("NEW_FOLDER_BTN"))
+        pyautogui.typewrite(subject_id)
+        pyautogui.press("enter")
+        time.sleep(0.2)
+        pyautogui.press("enter")
+        pyautogui.doubleClick(*pos("FOLDER_DOUBLECLICK"))
+        # 피험자별/주제별/회차별 이름 입력 (여기서는 fname)
+        pyautogui.typewrite(fname)
+        pyautogui.press("enter")
+        pyautogui.press("enter")
+        first_trial = False
+    else:
+        # 2회차 이상: 바로 이름 입력 및 저장
+        pyautogui.typewrite(fname)
+        pyautogui.press("enter")
+        pyautogui.press("enter")
+    log(f"REC_SAVED:{fname}")
+    cur_label = None
+    trial += 1
+
+# ── UDP 수신 루프 (PING 포함) ───────────────────────
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.bind(("0.0.0.0", PORT))
+print(f"[A] mouse-control – 포트 {PORT}")
+
 # 파일명 생성 함수
 def make_filename(subject_id, topic, trial, step_name):
     return f"{subject_id}_{topic}_{trial}회차_{step_name}"
 
 # 예시: 피험자/주제/회차 정보는 코드에서 직접 입력
-subject_id = "subj001"
 topic = "주제A"
 trial = 1
-
-# 시나리오 불러오기
-scenario = load_scenario()
 
 # 시나리오 순회하며 A:REC_OFF 명령이 있는 단계에서 파일명 생성
 for i, step in enumerate(scenario):
@@ -95,8 +115,11 @@ for i, step in enumerate(scenario):
 while True:
     msg, addr = sock.recvfrom(1024); msg = msg.decode().strip()
     if msg == "PING": sock.sendto(b"PONG", addr); continue
+    if msg.startswith("SUBJECT:"):
+        subject_id = msg.split(":", 1)[1]
+        print(f"[A] 피험자 이름 갱신: {subject_id}")
+        continue
     cmd, *arg = msg.split(":", 1)
-
     if cmd == "REC_ON":      record_on(arg[0] if arg else "noLabel")
     elif cmd == "REC_OFF":   record_off()
     elif cmd == "END":       break
