@@ -6,7 +6,7 @@ EEG PC (A) – Telescan 마우스 자동화 (마커 X)
 - PING/PONG      : 연결 확인
 """
 
-import socket, pyautogui, time, pathlib, datetime, json
+import socket, pyautogui, time, pathlib, datetime, json, yaml
 from config import PORT, LOG_DIR
 
 # ── 실험 참가자 ID만 앞에서 바꿔 주세요 ───────────
@@ -40,7 +40,7 @@ def record_off():
     fname = f"{cur_label}_{datetime.datetime.now():%H%M%S}"
 
     # 1) 파일명 입력
-    pyautogui.click(*pos("FILENAME_BOX"))
+    # pyautogui.click(*pos("FILENAME_BOX"))
     pyautogui.typewrite(fname)
 
     # 2) 경로 변경 → 바탕화면
@@ -64,6 +64,33 @@ def record_off():
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind(("0.0.0.0", PORT))
 print(f"[A] mouse-control – 포트 {PORT}")
+
+def load_scenario(yaml_path="scenario.yaml"):
+    with open(yaml_path, encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+    scenario = data["scenario"]
+    return scenario
+
+# 파일명 생성 함수
+def make_filename(subject_id, topic, trial, step_name):
+    return f"{subject_id}_{topic}_{trial}회차_{step_name}"
+
+# 예시: 피험자/주제/회차 정보는 코드에서 직접 입력
+subject_id = "subj001"
+topic = "주제A"
+trial = 1
+
+# 시나리오 불러오기
+scenario = load_scenario()
+
+# 시나리오 순회하며 A:REC_OFF 명령이 있는 단계에서 파일명 생성
+for i, step in enumerate(scenario):
+    send_cmds = step.get("send", [])
+    if any(cmd.startswith("A:REC_OFF") for cmd in send_cmds):
+        if i > 0:
+            prev_step_name = scenario[i-1]["name"]
+            fname = make_filename(subject_id, topic, trial, prev_step_name)
+            print(f"저장 파일명: {fname}")
 
 while True:
     msg, addr = sock.recvfrom(1024); msg = msg.decode().strip()

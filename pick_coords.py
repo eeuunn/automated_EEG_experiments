@@ -6,12 +6,21 @@ time.sleep(5)
 
 # ▶ 필요한 좌표 키 목록 (순서대로 찍습니다)
 KEYS = [
-    "REC_START",     # 녹화 시작 버튼
-    "REC_STOP",      # Stop 버튼
-    "FILENAME_BOX",  # 파일명 입력 칸
-    "PATH_BAR",      # 저장창 상단 경로(주소) 바
-    "DESKTOP_BTN",   # 왼쪽 탐색 트리뷰의 '바탕화면' 항목
-    "SAVE_BUTTON"    # 최종 저장 버튼
+    "REC_START",        # 녹화 시작 버튼
+    "REC_STOP",         # 녹화 정지 버튼
+    "ARROW_DOWN",       # 아래 화살표 (폴더 경로 이동용)
+    "DESKTOP_BTN",      # 바탕화면 버튼
+    "NEW_FOLDER_BTN",   # 새폴더 버튼
+    "FOLDER_NAME_BOX",  # 새폴더 이름 입력 칸 (필요시)
+    # (여기서 키보드로 이름 입력 및 Enter)
+    # (잠시 대기 후 Enter)
+    "FOLDER_DOUBLECLICK", # 이름 변경창(더블클릭)
+    # (여기서 피험자별/주제별/회차별 이름 입력 및 Enter, Enter)
+    # --- 2회차부터는 아래만 사용 ---
+    # "REC_START",      # 녹화 시작 버튼 (이미 위에 있음)
+    # "REC_STOP",       # 녹화 정지 버튼 (이미 위에 있음)
+    "FILENAME_BOX"      # 파일명 입력 칸 (2회차부터 바로 이름 입력)
+    # (여기서 이름 입력 및 Enter, Enter)
 ]
 
 coords = {}

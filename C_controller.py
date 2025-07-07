@@ -9,8 +9,14 @@ peer = {A_IP:False, B_IP:False}           # ★ 연결 확인용 플래그
 # ───── UDP 통신  (수신 스레드 추가) ───────────────────────────
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind(("", PORT))
-def send(ip, msg): sock.sendto(msg.encode(), (ip, PORT))
-
+def send(ip, msg):
+    try:
+        sock.sendto(msg.encode(), (ip, PORT))
+        log(f"TX→{ip}:{msg}")
+    except OSError as e:                   # ★ 추가
+        log(f"ERR:{ip}:{e}")               #   로그만 남기고
+        peer[ip] = False                   #   연결 끊김 표시
+        # 프로그램은 계속 실행
 def rx_loop():                             # ★ 항상 돌면서 PONG 수집
     while True:
         data, addr = sock.recvfrom(1024)
@@ -71,7 +77,7 @@ def ping_peers():                          # ★ 1초마다 핑
     send(A_IP,"PING"); send(B_IP,"PING")
 
 clock = pygame.time.Clock(); t_ping=0
-btn_rect = pygame.Rect(460, 40, 140, 60)   # ★ ‘START’ 버튼 영역
+btn_rect = pygame.Rect(460, 40, 140, 60)   # ★ 'START' 버튼 영역
 
 while True:
     for e in pygame.event.get():

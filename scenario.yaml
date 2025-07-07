@@ -1,27 +1,87 @@
 # name: 단계 이름, dur: 초, send: [대상:명령[:옵션]]
 
-- { name: "고정주시(시작)", dur: 2 }
+scenario:
+  - { name: "1. 고정주시(시작)", dur: 2 }
+  - { name: "1. 시나리오", dur: 30, send: [A:REC_ON:choice1, B:NEXT] }
+  - { name: "1. 고정주시(시나리오)", dur: 2, send: [A:REC_OFF, B:NEXT] }
+  - { name: "1. 선택지1",  dur: 15, send: [A:REC_ON:choice1, B:NEXT] }
+  - { name: "1. 고정주시1", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "1. 선택지2",  dur: 15, send: [A:REC_ON:choice2, B:NEXT] }
+  - { name: "1. 고정주시2", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "1. 선택지3",  dur: 15, send: [A:REC_ON:choice3, B:NEXT] }
+  - { name: "1. 고정주시3", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "1. 선택지4",  dur: 15, send: [A:REC_ON:choice4, B:NEXT] }
+  - { name: "1. 고정주시4", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "1. 선택지5",  dur: 15, send: [A:REC_ON:choice5, B:NEXT] }
+  - { name: "1. 고정주시5", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "1. 고민시간", dur: 30 }
+  - { name: "1. 응답", dur: 10 }
+  - { name: "1. ITI",  dur: 10 }
 
-- { name: "시나리오", dur: 60 }
+  - { name: "2. 고정주시(시작)", dur: 2 }
+  - { name: "2. 시나리오", dur: 30, send: [A:REC_ON:choice1, B:NEXT] }
+  - { name: "2. 고정주시(시나리오)", dur: 2, send: [A:REC_OFF, B:NEXT] }
+  - { name: "2. 선택지1",  dur: 15, send: [A:REC_ON:choice1, B:NEXT] }
+  - { name: "2. 고정주시1", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "2. 선택지2",  dur: 15, send: [A:REC_ON:choice2, B:NEXT] }
+  - { name: "2. 고정주시2", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "2. 선택지3",  dur: 15, send: [A:REC_ON:choice3, B:NEXT] }
+  - { name: "2. 고정주시3", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "2. 선택지4",  dur: 15, send: [A:REC_ON:choice4, B:NEXT] }
+  - { name: "2. 고정주시4", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "2. 선택지5",  dur: 15, send: [A:REC_ON:choice5, B:NEXT] }
+  - { name: "2. 고정주시5", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "2. 고민시간", dur: 30 }
+  - { name: "2. 응답", dur: 10 }
+  - { name: "2. ITI",  dur: 10 }
 
-# 선택지 1 ~ 5 (15 s) + 고정주시(2 s) × 5
-- { name: "선택지1",  dur: 15, send: [A:REC_ON:choice1, B:NEXT] }
-- { name: "고정주시1", dur: 2,  send: [A:REC_OFF] }
+  - { name: "3. 고정주시(시작)", dur: 2 }
+  - { name: "3. 시나리오", dur: 30, send: [A:REC_ON:choice1, B:NEXT] }
+  - { name: "3. 고정주시(시나리오)", dur: 2, send: [A:REC_OFF, B:NEXT] }
+  - { name: "3. 선택지1",  dur: 15, send: [A:REC_ON:choice1, B:NEXT] }
+  - { name: "3. 고정주시1", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "3. 선택지2",  dur: 15, send: [A:REC_ON:choice2, B:NEXT] }
+  - { name: "3. 고정주시2", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "3. 선택지3",  dur: 15, send: [A:REC_ON:choice3, B:NEXT] }
+  - { name: "3. 고정주시3", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "3. 선택지4",  dur: 15, send: [A:REC_ON:choice4, B:NEXT] }
+  - { name: "3. 고정주시4", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "3. 선택지5",  dur: 15, send: [A:REC_ON:choice5, B:NEXT] }
+  - { name: "3. 고정주시5", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "3. 고민시간", dur: 30 }
+  - { name: "3. 응답", dur: 10 }
+  - { name: "3. ITI",  dur: 10 }
 
-- { name: "선택지2",  dur: 15, send: [A:REC_ON:choice2, B:NEXT] }
-- { name: "고정주시2", dur: 2,  send: [A:REC_OFF] }
+  - { name: "4. 고정주시(시작)", dur: 2 }
+  - { name: "4. 시나리오", dur: 30, send: [A:REC_ON:choice1, B:NEXT] }
+  - { name: "4. 고정주시(시나리오)", dur: 2, send: [A:REC_OFF, B:NEXT] }
+  - { name: "4. 선택지1",  dur: 15, send: [A:REC_ON:choice1, B:NEXT] }
+  - { name: "4. 고정주시1", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "4. 선택지2",  dur: 15, send: [A:REC_ON:choice2, B:NEXT] }
+  - { name: "4. 고정주시2", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "4. 선택지3",  dur: 15, send: [A:REC_ON:choice3, B:NEXT] }
+  - { name: "4. 고정주시3", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "4. 선택지4",  dur: 15, send: [A:REC_ON:choice4, B:NEXT] }
+  - { name: "4. 고정주시4", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "4. 선택지5",  dur: 15, send: [A:REC_ON:choice5, B:NEXT] }
+  - { name: "4. 고정주시5", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "4. 고민시간", dur: 30 }
+  - { name: "4. 응답", dur: 10 }
+  - { name: "4. ITI",  dur: 10 }
 
-- { name: "선택지3",  dur: 15, send: [A:REC_ON:choice3, B:NEXT] }
-- { name: "고정주시3", dur: 2,  send: [A:REC_OFF] }
-
-- { name: "선택지4",  dur: 15, send: [A:REC_ON:choice4, B:NEXT] }
-- { name: "고정주시4", dur: 2,  send: [A:REC_OFF] }
-
-- { name: "선택지5",  dur: 15, send: [A:REC_ON:choice5, B:NEXT] }
-- { name: "고정주시5", dur: 2,  send: [A:REC_OFF] }
-
-- { name: "고민시간", dur: 30 }
-
-- { name: "응답", dur: 10, send: [A:MARK_RESP] }
-
-- { name: "ITI",  dur: 10, send: [A:END] }     # 실험 종료
+  - { name: "5. 고정주시(시작)", dur: 2 }
+  - { name: "5. 시나리오", dur: 30, send: [A:REC_ON:choice1, B:NEXT] }
+  - { name: "5. 고정주시(시나리오)", dur: 2, send: [A:REC_OFF, B:NEXT] }
+  - { name: "5. 선택지1",  dur: 15, send: [A:REC_ON:choice1, B:NEXT] }
+  - { name: "5. 고정주시1", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "5. 선택지2",  dur: 15, send: [A:REC_ON:choice2, B:NEXT] }
+  - { name: "5. 고정주시2", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "5. 선택지3",  dur: 15, send: [A:REC_ON:choice3, B:NEXT] }
+  - { name: "5. 고정주시3", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "5. 선택지4",  dur: 15, send: [A:REC_ON:choice4, B:NEXT] }
+  - { name: "5. 고정주시4", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "5. 선택지5",  dur: 15, send: [A:REC_ON:choice5, B:NEXT] }
+  - { name: "5. 고정주시5", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "5. 고민시간", dur: 30 }
+  - { name: "5. 응답", dur: 10 }
+  - { name: "5. ITI",  dur: 10 }

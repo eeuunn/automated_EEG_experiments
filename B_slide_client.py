@@ -8,11 +8,12 @@
 응답: PONG
 """
 import socket, pyautogui, pathlib, datetime
-from config import PORT, LOG_DIR
+from config import PORT, LOG_DIR as LOG_DIR_STR
 
 # —— 기본 설정 ——————————————————————————————
 pyautogui.PAUSE, pyautogui.FAILSAFE = 0.05, True
-LOG_DIR = pathlib.Path(LOG_DIR); LOG_DIR.mkdir(exist_ok=True)
+LOG_DIR = pathlib.Path(LOG_DIR_STR)
+LOG_DIR.mkdir(exist_ok=True)
 
 def log(msg):
     ts = datetime.datetime.now().isoformat(timespec="milliseconds")
