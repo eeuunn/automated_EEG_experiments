@@ -27,7 +27,7 @@ experiment/
 | 항목       | 버전/비고                                                    |
 | -------- | -------------------------------------------------------- |
 | Python   | 3.10 이상 (Windows 10/11 테스트 완료)                           |
-| 라이브러리    | `pygame`, `pyyaml`, `pyautogui`                          |
+| 라이브러리    | `pygame`, `pyyaml`, `pyautogui`, `pyperclip`                |
 | 네트워크     | TP‑Link 공유기 환경, **UDP 포트 4210** 허용                       |
 | 뇌파 소프트웨어 | Telescan (단축키: 새 세션 `Ctrl+N`, 녹화 `F5`, 정지 `F6`, 마커 `F9`) |
 | 슬라이드     | PowerPoint (슬라이드 쇼 시작 `F5`, 종료 `Esc`, 다음 `→`, 이전 `←`)    |
@@ -40,8 +40,11 @@ experiment/
 
 ```bash
 # 세 대의 PC 모두 동일
-pip install pygame pyyaml pyautogui
+pip install -r requirements.txt
 ```
+
+- requirements.txt에는 실험 자동화에 필요한 모든 라이브러리(`pyautogui`, `pyperclip`, `pyyaml`)가 포함되어 있습니다.
+- 한글 파일명/폴더명 자동 입력을 위해 `pyperclip`이 필수로 필요합니다.
 
 1. **고정 IP** : `config.py` 의 `A_IP`, `B_IP` 값을 각 PC 주소로 설정합니다.
 2. **방화벽** : TCP/UDP 4210 포트를 인바운드로 허용합니다.
@@ -66,13 +69,16 @@ pip install pygame pyyaml pyautogui
 ## 📝 시나리오 편집 (`scenario.yaml`)
 
 ```yaml
-# name : 단계 이름
+# name : 단계 이름 (예: "1. 선택지1" 등, 회차와 단계명 자동 추출)
 # dur  : 초 단위 지속시간(실수 가능)
 # send : [대상:명령, ...]  대상 A=EEG PC, B=슬라이드 PC
-- { name: "시나리오(1문)", dur: 60.3, send: [A:REC_ON,  B:SHOW_START] }
-- { name: "선택지1",        dur: 15.3, send: [B:NEXT] }
-# ... 중략 ...
-- { name: "ITI",           dur: 10.0, send: [A:REC_OFF, B:SHOW_END] }
+- { name: "1. 시나리오", dur: 30, send: [A:REC_ON:choice1, B:NEXT] }
+- { name: "1. 선택지1",  dur: 15, send: [A:REC_ON:choice1, B:NEXT] }
+- { name: "1. 고정주시1", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+- { name: "2. 시나리오", dur: 30, send: [A:REC_ON:choice1, B:NEXT] }
+- { name: "2. 선택지1",  dur: 15, send: [A:REC_ON:choice1, B:NEXT] }
+- { name: "2. 고정주시1", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+# ... 이하 반복 ...
 ```
 
 * **명령 목록**
@@ -80,6 +86,7 @@ pip install pygame pyyaml pyautogui
   * `A` : `REC_ON`, `REC_OFF`, `MARK_RESP` *(직접 추가 가능)*
   * `B` : `SHOW_START`, `SHOW_END`, `NEXT`, `PREV`
 * 단계는 원하는 만큼 추가·삭제할 수 있으며, `dur` 값으로 정확한 타이밍을 제어합니다.
+* **단계 이름(name)에서 회차와 주요 키워드는 자동 추출되어 파일명에 반영됩니다.**
 
 ---
 
@@ -103,6 +110,7 @@ pip install pygame pyyaml pyautogui
 | 명령이 수신되지 않음          | ① 방화벽 포트 4210 허용 여부 확인 ② `config.py` IP 오타?                      |
 | Telescan 창이 활성화되지 않음 | `eeg_client.py` 첫 줄에 `pyautogui.hotkey("alt","tab")` 등 포커스 이동 추가 |
 | 슬라이드가 넘어가지 않음        | PowerPoint 슬라이드 쇼 모드(`F5`)가 실행 중인지 확인                            |
+| 한글 파일명/폴더명 입력 안 됨   | `pyperclip` 미설치 시 `pip install pyperclip` 실행, 또는 requirements.txt 사용 |
 
 ---
 

@@ -8,6 +8,7 @@ EEG PC (A) – Telescan 마우스 자동화 (마커 X)
 
 import socket, pyautogui, time, pathlib, datetime, json, yaml, re
 from config import PORT, LOG_DIR
+import pyperclip
 
 # ── 실험 참가자 ID만 앞에서 바꿔 주세요 ───────────
 SUBJECT_ID = "subj001"
@@ -49,45 +50,69 @@ def safe_filename(s):
     # 파일명에 쓸 수 없는 문자(\ / : * ? " < > |)를 _로 대체
     return re.sub(r'[\\/:*?"<>|]', '_', s)
 
+def extract_trial_and_keyword(label):
+    # 예: '1. 선택지1' → (1, '선택지1')
+    import re
+    m = re.match(r"(\d+)\.\s*(.*)", label)
+    if m:
+        return int(m.group(1)), m.group(2).strip()
+    return 1, label.strip()
+
+def find_step_idx_by_label(label):
+    # label과 비슷한 step['name']을 찾아 인덱스 반환
+    trial, keyword = extract_trial_and_keyword(label)
+    for i, step in enumerate(scenario):
+        t, k = extract_trial_and_keyword(step["name"])
+        if t == trial and k == keyword:
+            return i
+    # 완전 일치가 없으면 키워드만으로도 시도
+    for i, step in enumerate(scenario):
+        _, k = extract_trial_and_keyword(step["name"])
+        if k == keyword:
+            return i
+    return 0  # fallback
+
 def record_on(label="noLabel"):
-    global cur_label, current_step_idx
+    global cur_label, current_step_idx, trial
     cur_label = label
+    trial, _ = extract_trial_and_keyword(label)
+    current_step_idx = find_step_idx_by_label(label)
     pyautogui.click(*pos("REC_START"))
     log(f"REC_START:{label}")
-    # label이 단계 이름이면, 현재 단계 인덱스 갱신
-    for i, step in enumerate(scenario):
-        if step["name"] == label:
-            current_step_idx = i
-            break
+
+def type_korean(text):
+    pyperclip.copy(text)
+    pyautogui.hotkey('ctrl', 'v')
 
 def record_off():
     global cur_label, current_step_idx, subject_id, trial, first_trial
     pyautogui.click(*pos("REC_STOP"))
     time.sleep(0.4)
+    # prev_step_name 추출
     prev_step_name = scenario[current_step_idx]["name"] if current_step_idx < len(scenario) else "unknown"
-    # 파일명 안전하게 변환
+    _, safe_step = extract_trial_and_keyword(prev_step_name)
     safe_id = safe_filename(subject_id)
-    safe_step = safe_filename(prev_step_name)
+    safe_step = safe_filename(safe_step)
     fname = f"{safe_id}_{trial}회차_{safe_step}_{datetime.datetime.now():%H%M%S}"
     if first_trial:
-        pyautogui.typewrite(fname)
+        type_korean(fname)
         pyautogui.press("enter")
         time.sleep(0.2)
         pyautogui.press("enter")
         pyautogui.click(*pos("ARROW_DOWN"))
         pyautogui.click(*pos("DESKTOP_BTN"))
         pyautogui.click(*pos("NEW_FOLDER_BTN"))
-        pyautogui.typewrite(safe_id)
+        type_korean(safe_id)
         pyautogui.press("enter")
         time.sleep(0.2)
         pyautogui.press("enter")
         pyautogui.doubleClick(*pos("FOLDER_DOUBLECLICK"))
-        pyautogui.typewrite(fname)
+        type_korean(fname)
         pyautogui.press("enter")
         pyautogui.press("enter")
         first_trial = False
     else:
-        pyautogui.typewrite(fname)
+        type_korean(fname)
         pyautogui.press("enter")
         pyautogui.press("enter")
     log(f"REC_SAVED:{fname}")
