@@ -1,154 +1,189 @@
 """
-EEG PC (A) – Telescan 마우스 자동화 (마커 X)
-- REC_ON[:label] : 녹화 시작
-- REC_OFF        : 녹화 정지·파일 저장
-- END            : 실험 종료
-- PING/PONG      : 연결 확인
+EEG PC (A) – Telescan 마우스 자동화 스크립트 (마커 X 버전)
+- REC_ON[:label]  : 녹화 시작
+- REC_OFF         : 녹화 정지·파일 저장
+- END             : 실험 종료
+- PING/PONG       : 연결 확인
 """
+
+# ─────────────────────────────────────────────────────────────
+#  필수 외부 모듈: pyautogui, pyperclip, pyyaml
+#  좌표 파일     : telescan_coords.json (스크린 해상도별로 직접 추출)
+#  시나리오     : scenario.yaml (아래 load_scenario에서 로드)
+#  로그 폴더    : config.LOG_DIR (예: "./logs")
+# ─────────────────────────────────────────────────────────────
 
 import socket, pyautogui, time, pathlib, datetime, json, yaml, re
 from config import PORT, LOG_DIR
 import pyperclip
 
-# ── 실험 참가자 ID만 앞에서 바꿔 주세요 ───────────
-SUBJECT_ID = "subj001"
+# ── 피험자 ID (실험 전 여기만 수정) ─────────────────
+subject_id = "subj001"
 
-# ── 좌표 로드 ─────────────────────────────────────
+# ── 좌표 로드 ──────────────────────────────────────
 coords = json.load(open("telescan_coords.json", encoding="utf-8"))
-pos = lambda key: coords[key]          # pos("REC_STOP") 식 호출
+pos    = lambda key: coords[key]        # pos("REC_STOP") 식으로 호출
 
-# ── 기본 설정 & 로그 ──────────────────────────────
+# ── 기본 설정 & 로그 ───────────────────────────────
 pyautogui.PAUSE, pyautogui.FAILSAFE = 0.07, True
 LOG_PATH = pathlib.Path(LOG_DIR); LOG_PATH.mkdir(exist_ok=True)
-def log(msg):
+
+def log(msg: str) -> None:
     ts = datetime.datetime.now().isoformat(timespec="milliseconds")
-    with open(LOG_PATH/f"A_eeg_{ts[:10]}.csv","a",encoding="utf-8") as f:
+    with open(LOG_PATH / f"A_eeg_{ts[:10]}.csv", "a", encoding="utf-8") as f:
         f.write(f"{ts},{msg}\n")
 
-# ── Telescan 제어 함수 ────────────────────────────
-cur_label = None
-subject_id = "subj001"  # 기본값, SUBJECT 메시지로 갱신됨
+# ── 전역 상태 변수 ─────────────────────────────────
+cur_label     : str | None = None       # 현재 REC_ON 라벨
+current_step_idx            = 0         # 시나리오 인덱스
+trial                        = 1         # 회차(1, 2, …)
+first_trial                  = True      # 첫 저장 여부
 
-# 회차 관리 변수 (실험 시작 시 1로 초기화, 이후 코드에서 증가 필요)
-trial = 1
-
-# 1회차 저장 플래그 (실험 시작 시 True, 이후 False)
-first_trial = True
-
-def load_scenario(yaml_path="scenario.yaml"):
+# ── 시나리오 로드 ──────────────────────────────────
+def load_scenario(yaml_path: str = "scenario.yaml") -> list[dict]:
     with open(yaml_path, encoding="utf-8") as f:
-        data = yaml.safe_load(f)
-    scenario = data["scenario"]
-    return scenario
+        return yaml.safe_load(f)["scenario"]
 
-scenario = load_scenario()
+scenario: list[dict] = load_scenario()
 
-# 현재 단계 인덱스 추적용
-current_step_idx = 0
+# ── 유틸리티 함수 ───────────────────────────────────
+def safe_filename(s: str) -> str:
+    """파일명 불가 문자를 ‘_’로 변환"""
+    return re.sub(r'[\\/:*?"<>|]', "_", s)
 
-def safe_filename(s):
-    # 파일명에 쓸 수 없는 문자(\ / : * ? " < > |)를 _로 대체
-    return re.sub(r'[\\/:*?"<>|]', '_', s)
+def extract_trial_and_keyword(label: str) -> tuple[int, str]:
+    """
+    '1. 선택지1' → (1, '선택지1')
+    숫자 없이 들어오면 trial=1 로 가정
+    """
+    m = re.match(r"\s*(\d+)\.\s*(.*)", label)
+    return (int(m.group(1)), m.group(2).strip()) if m else (1, label.strip())
 
-def extract_trial_and_keyword(label):
-    # 예: '1. 선택지1' → (1, '선택지1')
-    import re
-    m = re.match(r"(\d+)\.\s*(.*)", label)
-    if m:
-        return int(m.group(1)), m.group(2).strip()
-    return 1, label.strip()
-
-def find_step_idx_by_label(label):
-    # label과 비슷한 step['name']을 찾아 인덱스 반환
-    trial, keyword = extract_trial_and_keyword(label)
+def find_step_idx_by_label(label: str) -> int:
+    """label과 가장 잘 맞는 시나리오 인덱스 반환(없으면 0)"""
+    t_lbl, k_lbl = extract_trial_and_keyword(label)
     for i, step in enumerate(scenario):
-        t, k = extract_trial_and_keyword(step["name"])
-        if t == trial and k == keyword:
+        t_stp, k_stp = extract_trial_and_keyword(step["name"])
+        if t_lbl == t_stp and k_lbl == k_stp:
             return i
-    # 완전 일치가 없으면 키워드만으로도 시도
+    # 키워드만 일치해도 허용
     for i, step in enumerate(scenario):
-        _, k = extract_trial_and_keyword(step["name"])
-        if k == keyword:
+        _, k_stp = extract_trial_and_keyword(step["name"])
+        if k_lbl == k_stp:
             return i
-    return 0  # fallback
+    return 0
 
-def record_on(label="noLabel"):
+def type_korean(text: str) -> None:
+    """Telescan 파일명 입력 대화상자에 한글 붙여넣기"""
+    pyperclip.copy(text)
+    pyautogui.hotkey("ctrl", "v")
+
+# ── Telescan 제어 함수 ──────────────────────────────
+def record_on(label: str = "noLabel") -> None:
+    """
+    1) 녹화 버튼 클릭
+    2) 라벨 / 시나리오 위치 업데이트
+    3) 로그 기록
+    """
     global cur_label, current_step_idx, trial
-    cur_label = label
-    trial, _ = extract_trial_and_keyword(label)
+
+    cur_label       = label
+    trial, _        = extract_trial_and_keyword(label)  # trial 동기화
     current_step_idx = find_step_idx_by_label(label)
+
     pyautogui.click(*pos("REC_START"))
     log(f"REC_START:{label}")
 
-def type_korean(text):
-    pyperclip.copy(text)
-    pyautogui.hotkey('ctrl', 'v')
-
-def record_off():
+def record_off() -> None:
+    """
+    1) 녹화 중지 버튼 클릭
+    2) 파일명 생성 → 저장
+    3) trial +1, 로그 기록
+    """
     global cur_label, current_step_idx, subject_id, trial, first_trial
+
     pyautogui.click(*pos("REC_STOP"))
     time.sleep(0.4)
-    # prev_step_name 추출
-    prev_step_name = scenario[current_step_idx]["name"] if current_step_idx < len(scenario) else "unknown"
-    _, safe_step = extract_trial_and_keyword(prev_step_name)
-    safe_id = safe_filename(subject_id)
-    safe_step = safe_filename(safe_step)
-    fname = f"{safe_id}_{trial}회차_{safe_step}_{datetime.datetime.now():%H%M%S}"
+
+    # ── ① 저장할 스텝 이름 결정 (직전 스텝 기준, 한글 스텝명)
+    prev_idx   = max(current_step_idx - 1, 0)
+    step_raw   = scenario[prev_idx]["name"]
+    _, step_nm = extract_trial_and_keyword(step_raw)
+
+    # ── ② 안전한 파일명 조립
+    safe_id   = safe_filename(subject_id)
+    safe_step = safe_filename(step_nm)
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    fname     = f"{safe_id}_{trial:02d}회차_{safe_step}_{timestamp}.eeg"
+
+    # ── ③ Telescan 저장 대화상자 조작
     if first_trial:
+        # (1) 첫 저장 : 폴더 → 새 폴더 → 더블클릭
         type_korean(fname)
-        pyautogui.press("enter")
-        time.sleep(0.2)
+        pyautogui.press("enter"); time.sleep(0.2)
         pyautogui.press("enter")
         pyautogui.click(*pos("ARROW_DOWN"))
         pyautogui.click(*pos("DESKTOP_BTN"))
         pyautogui.click(*pos("NEW_FOLDER_BTN"))
-        type_korean(safe_id)
-        pyautogui.press("enter")
-        time.sleep(0.2)
-        pyautogui.press("enter")
+        type_korean(safe_id); pyautogui.press("enter"); time.sleep(0.2)
+        pyautogui.press("enter")                      # 폴더 열기
         pyautogui.doubleClick(*pos("FOLDER_DOUBLECLICK"))
-        type_korean(fname)
-        pyautogui.press("enter")
+        type_korean(fname); pyautogui.press("enter")
         pyautogui.press("enter")
         first_trial = False
     else:
+        # (2) 두 번째부터는 파일명만 입력
         type_korean(fname)
         pyautogui.press("enter")
         pyautogui.press("enter")
+
     log(f"REC_SAVED:{fname}")
     cur_label = None
-    trial += 1
+    trial    += 1          # 다음 회차 준비
 
-# ── UDP 수신 루프 (PING 포함) ───────────────────────
+# ── UDP 수신 루프 ──────────────────────────────────
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind(("0.0.0.0", PORT))
 print(f"[A] mouse-control – 포트 {PORT}")
 
-# 파일명 생성 함수
-def make_filename(subject_id, topic, trial, step_name):
-    return f"{subject_id}_{topic}_{trial}회차_{step_name}"
+def handle_udp_message(msg: str, addr) -> None:
+    """수신 문자열 파싱 → 명령 실행"""
+    global subject_id
 
-# 예시: 피험자/주제/회차 정보는 코드에서 직접 입력
-topic = "주제A"
-trial = 1
+    if msg == "PING":
+        sock.sendto(b"PONG", addr)
+        return
 
-# 시나리오 순회하며 A:REC_OFF 명령이 있는 단계에서 파일명 생성
-for i, step in enumerate(scenario):
-    send_cmds = step.get("send", [])
-    if any(cmd.startswith("A:REC_OFF") for cmd in send_cmds):
-        if i > 0:
-            prev_step_name = scenario[i-1]["name"]
-            fname = make_filename(subject_id, topic, trial, prev_step_name)
-            print(f"저장 파일명: {fname}")
-
-while True:
-    msg, addr = sock.recvfrom(1024); msg = msg.decode().strip()
-    if msg == "PING": sock.sendto(b"PONG", addr); continue
     if msg.startswith("SUBJECT:"):
-        subject_id = msg.split(":", 1)[1]
-        print(f"[A] 피험자 이름 갱신: {subject_id}")
-        continue
+        subject_id = msg.split(":", 1)[1].strip()
+        print(f"[A] 피험자 ID 갱신 → {subject_id}")
+        return
+
     cmd, *arg = msg.split(":", 1)
-    if cmd == "REC_ON":      record_on(arg[0] if arg else "noLabel")
-    elif cmd == "REC_OFF":   record_off()
-    elif cmd == "END":       break
+    if   cmd == "REC_ON":   record_on(arg[0] if arg else "noLabel")
+    elif cmd == "REC_OFF":  record_off()
+    elif cmd == "END":      raise SystemExit
+
+# ── (선택) 예상 파일명 미리보기 ────────────────────
+def preview_filenames(topic: str = "주제A") -> None:
+    """시나리오 돌면서 A:REC_OFF 마다 예상 파일명 출력"""
+    t = 1
+    for i, st in enumerate(scenario):
+        if any(s.startswith("A:REC_OFF") for s in st.get("send", [])):
+            prev = scenario[i-1]["name"]
+            _, step_nm = extract_trial_and_keyword(prev)
+            print(f"{subject_id}_{topic}_{t:02d}회차_{safe_filename(step_nm)}.eeg")
+            t += 1
+
+# preview_filenames()    # ← 필요하면 주석 해제
+
+# ── Main Loop ────────────────────────────────────
+try:
+    while True:
+        raw, addr = sock.recvfrom(1024)
+        handle_udp_message(raw.decode().strip(), addr)
+
+except SystemExit:
+    print("[A] 실험 종료 신호 수신 → 스크립트 종료")
+finally:
+    sock.close()
