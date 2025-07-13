@@ -320,3 +320,83 @@ scenario:
   - { name: "20. 고정주시5", dur: 2,  send: [A:REC_OFF, B:NEXT] }
   - { name: "20. 고민시간 및 응답", dur: 10,  send: [B:NEXT] }
   - { name: "20. ITI",  dur: 5,  send: [B:NEXT] }
+
+  - { name: "21. 고정주시(시작)", dur: 2 }
+  - { name: "21. 시나리오", dur: 30, send: [A:REC_ON:scenario, B:NEXT] }
+  - { name: "21. 고정주시(시나리오)", dur: 2, send: [A:REC_OFF, B:NEXT] }
+  - { name: "21. 선택지1",  dur: 15, send: [A:REC_ON:choice1, B:NEXT] }
+  - { name: "21. 고정주시1", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "21. 선택지2",  dur: 15, send: [A:REC_ON:choice2, B:NEXT] }
+  - { name: "21. 고정주시2", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "21. 선택지3",  dur: 15, send: [A:REC_ON:choice3, B:NEXT] }
+  - { name: "21. 고정주시3", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "21. 선택지4",  dur: 15, send: [A:REC_ON:choice4, B:NEXT] }
+  - { name: "21. 고정주시4", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "21. 선택지5",  dur: 15, send: [A:REC_ON:choice5, B:NEXT] }
+  - { name: "21. 고정주시5", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "21. 고민시간 및 응답", dur: 10,  send: [B:NEXT] }
+  - { name: "21. ITI",  dur: 5,  send: [B:NEXT] }
+
+  - { name: "22. 고정주시(시작)", dur: 2 }
+  - { name: "22. 시나리오", dur: 30, send: [A:REC_ON:scenario, B:NEXT] }
+  - { name: "22. 고정주시(시나리오)", dur: 2, send: [A:REC_OFF, B:NEXT] }
+  - { name: "22. 선택지1",  dur: 15, send: [A:REC_ON:choice1, B:NEXT] }
+  - { name: "22. 고정주시1", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "22. 선택지2",  dur: 15, send: [A:REC_ON:choice2, B:NEXT] }
+  - { name: "22. 고정주시2", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "22. 선택지3",  dur: 15, send: [A:REC_ON:choice3, B:NEXT] }
+  - { name: "22. 고정주시3", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "22. 선택지4",  dur: 15, send: [A:REC_ON:choice4, B:NEXT] }
+  - { name: "22. 고정주시4", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "22. 선택지5",  dur: 15, send: [A:REC_ON:choice5, B:NEXT] }
+  - { name: "22. 고정주시5", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "22. 고민시간 및 응답", dur: 10,  send: [B:NEXT] }
+  - { name: "22. ITI",  dur: 5,  send: [B:NEXT] }
+
+  - { name: "23. 고정주시(시작)", dur: 2 }
+  - { name: "23. 시나리오", dur: 30, send: [A:REC_ON:scenario, B:NEXT] }
+  - { name: "23. 고정주시(시나리오)", dur: 2, send: [A:REC_OFF, B:NEXT] }
+  - { name: "23. 선택지1",  dur: 15, send: [A:REC_ON:choice1, B:NEXT] }
+  - { name: "23. 고정주시1", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "23. 선택지2",  dur: 15, send: [A:REC_ON:choice2, B:NEXT] }
+  - { name: "23. 고정주시2", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "23. 선택지3",  dur: 15, send: [A:REC_ON:choice3, B:NEXT] }
+  - { name: "23. 고정주시3", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "23. 선택지4",  dur: 15, send: [A:REC_ON:choice4, B:NEXT] }
+  - { name: "23. 고정주시4", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "23. 선택지5",  dur: 15, send: [A:REC_ON:choice5, B:NEXT] }
+  - { name: "23. 고정주시5", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "23. 고민시간 및 응답", dur: 10,  send: [B:NEXT] }
+  - { name: "23. ITI",  dur: 5,  send: [B:NEXT] }
+
+  - { name: "24. 고정주시(시작)", dur: 2 }
+  - { name: "24. 시나리오", dur: 30, send: [A:REC_ON:scenario, B:NEXT] }
+  - { name: "24. 고정주시(시나리오)", dur: 2, send: [A:REC_OFF, B:NEXT] }
+  - { name: "24. 선택지1",  dur: 15, send: [A:REC_ON:choice1, B:NEXT] }
+  - { name: "24. 고정주시1", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "24. 선택지2",  dur: 15, send: [A:REC_ON:choice2, B:NEXT] }
+  - { name: "24. 고정주시2", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "24. 선택지3",  dur: 15, send: [A:REC_ON:choice3, B:NEXT] } 
+  - { name: "24. 고정주시3", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "24. 선택지4",  dur: 15, send: [A:REC_ON:choice4, B:NEXT] }
+  - { name: "24. 고정주시4", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "24. 선택지5",  dur: 15, send: [A:REC_ON:choice5, B:NEXT] }
+  - { name: "24. 고정주시5", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "24. 고민시간 및 응답", dur: 10,  send: [B:NEXT] }
+  - { name: "24. ITI",  dur: 5,  send: [B:NEXT] }
+
+  - { name: "25. 고정주시(시작)", dur: 2 }
+  - { name: "25. 시나리오", dur: 30, send: [A:REC_ON:scenario, B:NEXT] }
+  - { name: "25. 고정주시(시나리오)", dur: 2, send: [A:REC_OFF, B:NEXT] }
+  - { name: "25. 선택지1",  dur: 15, send: [A:REC_ON:choice1, B:NEXT] }
+  - { name: "25. 고정주시1", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "25. 선택지2",  dur: 15, send: [A:REC_ON:choice2, B:NEXT] }
+  - { name: "25. 고정주시2", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "25. 선택지3",  dur: 15, send: [A:REC_ON:choice3, B:NEXT] }
+  - { name: "25. 고정주시3", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "25. 선택지4",  dur: 15, send: [A:REC_ON:choice4, B:NEXT] }
+  - { name: "25. 고정주시4", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "25. 선택지5",  dur: 15, send: [A:REC_ON:choice5, B:NEXT] }
+  - { name: "25. 고정주시5", dur: 2,  send: [A:REC_OFF, B:NEXT] }
+  - { name: "25. 고민시간 및 응답", dur: 10,  send: [B:NEXT] }
+  - { name: "25. ITI",  dur: 5,  send: [B:NEXT] }
