@@ -118,4 +118,4 @@ pip install -r requirements.txt
 
 MIT License – 자유롭게 수정/재배포 가능. 다만 실제 실험에 적용하기 전 **안전성 테스트** 를 충분히 진행하세요.
 
-> © 2025 Kangwon Science High School BCI Lab / Author: Eunwoo Chae & Contributors
+> © 2025 Kangwon Science High School / Author: Eunwoo Chae
