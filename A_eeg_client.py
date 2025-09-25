@@ -1,3 +1,15 @@
+# 더 이상 사용하지 않는 파일!
+
+
+
+
+
+
+
+
+
+
+
 """
 EEG PC (A) – Telescan 마우스 자동화 스크립트 (마커 X 버전)
 - REC_ON[:label]  : 녹화 시작
@@ -5,13 +17,6 @@ EEG PC (A) – Telescan 마우스 자동화 스크립트 (마커 X 버전)
 - END             : 실험 종료
 - PING/PONG       : 연결 확인
 """
-
-# ─────────────────────────────────────────────────────────────
-#  필수 외부 모듈: pyautogui, pyperclip, pyyaml
-#  좌표 파일     : telescan_coords.json (스크린 해상도별로 직접 추출)
-#  시나리오     : scenario.yaml (아래 load_scenario에서 로드)
-#  로그 폴더    : config.LOG_DIR (예: "./logs")
-# ─────────────────────────────────────────────────────────────
 
 import socket, pyautogui, time, pathlib, datetime, json, yaml, re
 from config import PORT, LOG_DIR
