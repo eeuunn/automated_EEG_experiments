@@ -1,7 +1,7 @@
 # pick_coords.py ― Telescan 전용 좌표 수집기
 import pyautogui, time, json, pathlib
 
-print("★ 5초 안에 Telescan 창으로 이동해 주세요 …")
+print("5초 안에 Telescan 창으로 이동해 주세요")
 time.sleep(5)
 
 # ▶ 필요한 좌표 키 목록 (순서대로 찍습니다)
@@ -25,11 +25,11 @@ KEYS = [
 
 coords = {}
 for key in KEYS:
-    print(f"\n▶ {key} 위치로 마우스를 옮긴 뒤 3초만 기다려 주세요 …")
+    print(f"\n{key} 위치로 마우스를 옮긴 뒤 3초만 기다려 주세요")
     time.sleep(3)
     x, y = pyautogui.position()
     coords[key] = (x, y)
-    print(f"  → {key} 기록 완료: {x}, {y}")
+    print(f"{key} 기록 완료: {x}, {y}")
 
 path = pathlib.Path("telescan_coords.json")
 path.write_text(json.dumps(coords, indent=2))
