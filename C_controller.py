@@ -8,7 +8,7 @@ import threading
 import pygame
 import sys
 from config import A_IP, B_IP, PORT, SCENARIO_FILE, LOG_DIR, EEG_DATA_DIR
-from pylsl import StreamInlet, resolve_streams # LSL 라이브러리 임포트
+from pylsl import StreamInlet, resolve_byprop # LSL 라이브러리 임포트
 
 # ----------------- 전역 -----------------
 _state = {"step":"대기 중", "remain":0.0, "running":False}
@@ -46,7 +46,7 @@ def connect_to_lsl_stream():
     global eeg_inlet, eeg_stream_info
     try:
         log("LSL에서 'EEG' 타입 스트림을 찾는 중...")
-        streams = resolve_streams('type', 'EEG', timeout=5)
+        streams = resolve_byprop('type', 'EEG', timeout=5)
         
         if not streams:
             log("오류: LSL에서 EEG 스트림을 찾을 수 없습니다. C++ 프로그램을 먼저 실행했는지 확인하세요.")
