@@ -242,34 +242,51 @@ def input_subject_id():
 
 # ----------------- 시나리오 스레드 -----------------
 def scenario_worker():
+    # A 컴퓨터가 연결된 경우에만 피험자 이름 전송
     if peer[A_IP]:
         send(A_IP, f"SUBJECT:{subject_id}")
     
     with open(SCENARIO_FILE, encoding="utf-8") as f:
         steps = yaml.safe_load(f)["scenario"]
     
-    # 전체 시나리오에 대한 기록을 한번만 하도록 수정
-    start_eeg_recording()
-
     for st in steps:
-        name, dur = st["name"], float(st["dur"])
+        name,dur = st["name"], float(st["dur"])
         _state.update(step=name, remain=dur)
         
+        # EEG 기록이 필요한 단계인지 확인 (A:REC_ON 명령이 있는지)
+        has_rec_on = any("A:REC_ON" in item for item in st.get("send", []))
+        if has_rec_on:
+            # 현재 단계 이름으로 EEG 기록 시작
+            start_eeg_recording(name)
+        
         for item in st.get("send", []):
-            tgt, cmd = item.split(":", 1)
-            target_ip = A_IP if tgt.strip() == "A" else B_IP
-            if (tgt.strip() == "A" and peer[A_IP]) or tgt.strip() == "B":
+            tgt,cmd = item.split(":",1)
+            target_ip = A_IP if tgt.strip()=="A" else B_IP
+            
+            # A:REC_ON, A:REC_OFF 명령은 이제 C에서 직접 처리하므로 건너뜀
+            if tgt.strip()=="A" and (cmd.strip().startswith("REC_ON") or cmd.strip().startswith("REC_OFF")):
+                continue
+                
+            # A 컴퓨터 연결 확인 후 전송, B 컴퓨터는 항상 전송 시도
+            if tgt.strip()=="A" and peer[A_IP]:
+                send(target_ip, cmd.strip())
+            elif tgt.strip()=="B":
                 send(target_ip, cmd.strip())
         
-        t0 = time.perf_counter()
-        while (rem := dur - (time.perf_counter() - t0)) > 0:
-            _state["remain"] = rem
-            time.sleep(0.05)
+        t0=time.perf_counter()
+        while (rem:=dur-(time.perf_counter()-t0))>0:
+            _state["remain"]=rem; time.sleep(0.05)
+        
+        # EEG 기록 중지가 필요한 단계인지 확인 (A:REC_OFF 명령이 있는지)
+        has_rec_off = any("A:REC_OFF" in item for item in st.get("send", []))
+        if has_rec_off:
+            stop_eeg_recording()
     
-    stop_eeg_recording() # 시나리오 전체 종료 후 기록 중지
-    
-    if peer[A_IP]: send(A_IP, "END")
-    if peer[B_IP]: send(B_IP, "END")
+    # 연결된 컴퓨터들에만 종료 신호 전송
+    if peer[A_IP]:
+        send(A_IP,"END")
+    if peer[B_IP]:
+        send(B_IP,"END")
     _state.update(step="실험 종료", remain=0.0, running=False)
 
 # ----------------- 한글 폰트 로더 -----------------
